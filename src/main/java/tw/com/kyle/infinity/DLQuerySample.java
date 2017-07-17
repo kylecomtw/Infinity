@@ -70,15 +70,41 @@ public class DLQuerySample {
     }
     
     public JsonElement QueryAsJson(String queryStr) { 
-        if (dlQueryPrinter != null){
-            return dlQueryPrinter.askQuery(queryStr.trim());    
+        if (dlQueryPrinter != null){ 
+            try{
+                return dlQueryPrinter.askQuery(queryStr.trim());    
+            } catch (Exception ex) {
+                System.out.println("ERROR: " + ex.toString());
+                return new JsonPrimitive("error");
+            }
         } else {
             return new JsonPrimitive("Error: No ontology loaded");
         }        
     }
     
+    public JsonElement AskAsJson(String queryStr) {
+        if (dlQueryPrinter != null){
+            try{
+                return dlQueryPrinter.askSatisfiable(queryStr.trim());    
+            } catch (Exception ex) {
+                System.out.println("ERROR: " + ex.toString());
+                return new JsonPrimitive("error");
+            }
+        } else {
+            return new JsonPrimitive("Error: No ontology loaded");
+        }    
+    }
+    
     public String Query(String queryStr) { 
         JsonElement jelem = QueryAsJson(queryStr);
+        Gson gson = new GsonBuilder().setPrettyPrinting().create();
+        String resp = gson.toJson(jelem);
+        
+        return resp;
+    }
+    
+    public String Ask(String queryStr) {
+        JsonElement jelem = AskAsJson(queryStr);
         Gson gson = new GsonBuilder().setPrettyPrinting().create();
         String resp = gson.toJson(jelem);
         
@@ -95,7 +121,17 @@ class DLQueryEngine {
         this.reasoner = reasoner;
         parser = new DLQueryParser(reasoner.getRootOntology(), shortFormProvider);
     }
-
+    
+    public boolean isSatisfiable(String classExpressionString) {
+        if (classExpressionString.trim().length() == 0) {
+            return false;
+        }
+        OWLClassExpression classExpression = parser
+                .parseClassExpression(classExpressionString);
+        boolean isSatisfied = reasoner.isSatisfiable(classExpression);
+        return isSatisfied;
+    }
+    
     public Set<OWLClass> getSuperClasses(String classExpressionString, boolean direct) {
         if (classExpressionString.trim().length() == 0) {
             return Collections.emptySet();
@@ -183,7 +219,16 @@ class DLQueryPrinter {
         this.shortFormProvider = shortFormProvider;
         dlQueryEngine = engine;
     }
-
+    
+    public JsonElement askSatisfiable(String classExpression) {
+        if (classExpression.length() == 0) {
+            System.out.println("No class expression specified");
+            return new JsonPrimitive("Empty query");
+        } else {            
+            boolean isSatisfied = dlQueryEngine.isSatisfiable(classExpression);
+            return new JsonPrimitive(isSatisfied);
+        }
+    }
     public JsonElement askQuery(String classExpression) {
         if (classExpression.length() == 0) {
             System.out.println("No class expression specified");

@@ -8,6 +8,7 @@ package tw.com.kyle.infinity;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
 import py4j.GatewayServer;
 
 /**
@@ -20,9 +21,13 @@ public class InfinityMain {
         String ontoFilePath = "E:\\Kyle\\TextInf\\etc\\dbpedia_2016-04.owl";
         DLQuerySample dl_query = new DLQuerySample();
         dl_query.LoadOntology(ontoFilePath);
-        JsonElement jelem = dl_query.QueryAsJson("Animal");
+        JsonElement jelem = dl_query.QueryAsJson("Bird and Animal");
+        JsonElement jsatis = dl_query.AskAsJson("Bird and Plant");
         Gson gson = new GsonBuilder().setPrettyPrinting().create();
-        String resp = gson.toJson(jelem);
+        JsonObject jobj = new JsonObject();
+        jobj.add("Query", jelem);
+        jobj.add("Ask", jsatis);
+        String resp = gson.toJson(jobj);        
         System.out.println(resp);
     }       
     
@@ -32,7 +37,11 @@ public class InfinityMain {
         DLQuerySample inst = new DLQuerySample();
         return inst;
     }   
-
+    
+    public static void main2(String[] argv) throws Exception {
+        testDummy();
+    }
+    
     public static void main(String[] argv) throws Exception {
         GatewayServer gateway = new GatewayServer(new InfinityMain(), 21322);
         gateway.start();
