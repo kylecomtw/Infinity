@@ -33,7 +33,9 @@ public class InfinityMain {
 
     public static void testInfOnto() throws Exception {
         InfOntology inf_onto = new InfOntology();
-        inf_onto.ParseAxiom("Class: Person");
+        inf_onto.LoadOWL("Prefix: : <http://example.com/>\n" + "Class: Person\n");
+        // inf_onto.ParseAxiom("Class: Person");
+
         // inf_onto.ParseExpression("Human and not Parent");
     }
     

@@ -11,11 +11,11 @@ import org.coode.owlapi.manchesterowlsyntax.ManchesterOWLSyntaxEditorParser;
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.expression.OWLEntityChecker;
 import org.semanticweb.owlapi.expression.ShortFormEntityChecker;
-import org.semanticweb.owlapi.model.OWLAxiom;
-import org.semanticweb.owlapi.model.OWLClassExpression;
-import org.semanticweb.owlapi.model.OWLDataFactory;
-import org.semanticweb.owlapi.model.OWLOntology;
-import org.semanticweb.owlapi.model.OWLOntologyManager;
+import org.semanticweb.owlapi.io.OWLOntologyDocumentSource;
+import org.semanticweb.owlapi.io.OWLParser;
+import org.semanticweb.owlapi.io.StringDocumentSource;
+import org.semanticweb.owlapi.manchestersyntax.parser.ManchesterOWLSyntaxOntologyParserFactory;
+import org.semanticweb.owlapi.model.*;
 import org.semanticweb.owlapi.util.BidirectionalShortFormProvider;
 import org.semanticweb.owlapi.util.BidirectionalShortFormProviderAdapter;
 import org.semanticweb.owlapi.util.OntologyAxiomPair;
@@ -37,6 +37,14 @@ class InfOntology {
                 importsClosure.collect(Collectors.toList()), shortFormProvider);
     }
 
+    public OWLOntology GetOwlOntology() {
+        return ontology;
+    }
+
+    public BidirectionalShortFormProvider GetShortFormProvider() {
+        return bidiShortFormProvider;
+    }
+
     public void ImportFile(String ontoPath) throws Exception {
         if (!Files.exists(Paths.get(ontoPath))) {
             throw new FileNotFoundException("Cannot find " + ontoPath);
@@ -53,20 +61,18 @@ class InfOntology {
         OWLEntityChecker entityChecker = new ShortFormEntityChecker(bidiShortFormProvider);
 
         parser.setOWLEntityChecker(entityChecker);
-        parser.setStringToParse(manchesterString);
         parser.setDefaultOntology(ontology);
+        parser.setStringToParse(manchesterString);
         return parser;
     }
 
-    public void ParseAxiom(String manchesterString) {
-        ManchesterOWLSyntaxParser parser = getManchesterParser(manchesterString);
-        Set<OntologyAxiomPair> axiom = parser.parseClassFrame();
-        System.out.println(axiom);
+    public void LoadOWL(String manchesterString){
+        OWLParser parser = new ManchesterOWLSyntaxOntologyParserFactory().createParser();
+        OWLOntologyDocumentSource src = new StringDocumentSource(manchesterString);
+        OWLOntologyLoaderConfiguration config = new OWLOntologyLoaderConfiguration();
+        parser.parse(src, ontology, config);
+
+        System.out.println(ontology.toString());
     }
 
-    public void ParseExpression(String manchesterString) {
-        ManchesterOWLSyntaxParser parser = getManchesterParser(manchesterString);  
-        OWLClassExpression expr = parser.parseClassExpression();
-        System.out.println(expr);
-    }
 }
