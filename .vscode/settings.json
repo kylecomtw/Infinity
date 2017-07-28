@@ -1,0 +1,5 @@
+// Place your settings in this file to overwrite default and user settings.
+{
+    "code-runner.customCommand": "mvn exec:java",
+    "code-runner.fileDirectoryAsCwd": false
+}

@@ -30,6 +30,12 @@ public class InfinityMain {
         String resp = gson.toJson(jobj);        
         System.out.println(resp);
     }       
+
+    public static void testInfOnto() throws Exception {
+        InfOntology inf_onto = new InfOntology();
+        inf_onto.ParseAxiom("Class: Person");
+        // inf_onto.ParseExpression("Human and not Parent");
+    }
     
     private final DLQuerySample query_inst = new DLQuerySample();
     public InfinityMain(){}
@@ -38,11 +44,12 @@ public class InfinityMain {
         return inst;
     }   
     
-    public static void main2(String[] argv) throws Exception {
-        testDummy();
+    public static void main(String[] argv) throws Exception {
+        // testDummy();
+        testInfOnto();
     }
     
-    public static void main(String[] argv) throws Exception {
+    public static void main2(String[] argv) throws Exception {
         GatewayServer gateway = new GatewayServer(new InfinityMain(), 21322);
         gateway.start();
         System.out.println("Gateway server running on 0.0.0.0:21322");
