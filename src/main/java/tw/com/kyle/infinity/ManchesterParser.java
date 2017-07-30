@@ -3,9 +3,15 @@ package tw.com.kyle.infinity;
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.expression.OWLEntityChecker;
 import org.semanticweb.owlapi.expression.ShortFormEntityChecker;
+import org.semanticweb.owlapi.manchestersyntax.parser.ManchesterOWLSyntaxOntologyParserFactory;
+import org.semanticweb.owlapi.manchestersyntax.parser.ManchesterOWLSyntaxParserException;
+import org.semanticweb.owlapi.model.OWLAxiom;
+import org.semanticweb.owlapi.model.OWLClassAxiom;
 import org.semanticweb.owlapi.model.OWLClassExpression;
 import org.semanticweb.owlapi.util.BidirectionalShortFormProvider;
 import org.semanticweb.owlapi.util.mansyntax.ManchesterOWLSyntaxParser;
+
+import java.util.stream.Stream;
 
 public class ManchesterParser {
 
@@ -36,4 +42,5 @@ public class ManchesterParser {
         System.out.println(expr);
         return expr;
     }
+
 }

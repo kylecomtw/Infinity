@@ -1,7 +1,6 @@
 package tw.com.kyle.infinity;
 
-import java.io.File;
-import java.io.FileNotFoundException;
+import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.Set;
@@ -11,9 +10,8 @@ import org.coode.owlapi.manchesterowlsyntax.ManchesterOWLSyntaxEditorParser;
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.expression.OWLEntityChecker;
 import org.semanticweb.owlapi.expression.ShortFormEntityChecker;
-import org.semanticweb.owlapi.io.OWLOntologyDocumentSource;
-import org.semanticweb.owlapi.io.OWLParser;
-import org.semanticweb.owlapi.io.StringDocumentSource;
+import org.semanticweb.owlapi.formats.ManchesterSyntaxDocumentFormat;
+import org.semanticweb.owlapi.io.*;
 import org.semanticweb.owlapi.manchestersyntax.parser.ManchesterOWLSyntaxOntologyParserFactory;
 import org.semanticweb.owlapi.model.*;
 import org.semanticweb.owlapi.util.BidirectionalShortFormProvider;
@@ -49,21 +47,26 @@ class InfOntology {
         if (!Files.exists(Paths.get(ontoPath))) {
             throw new FileNotFoundException("Cannot find " + ontoPath);
         }
-        File ontoFile = new File(ontoPath);
-        throw new UnsupportedOperationException();
+        OWLOntologyDocumentSource ontoSrc = new FileDocumentSource(new File(ontoPath));
+        OWLOntology in_onto = manager.loadOntologyFromOntologyDocument(ontoSrc);
 
+        in_onto.axioms().forEach((axiom)-> ontology.addAxiom(axiom));
     }
 
-    private ManchesterOWLSyntaxParser getManchesterParser(
-        String manchesterString
-    ){
-        ManchesterOWLSyntaxParser parser = OWLManager.createManchesterParser();
-        OWLEntityChecker entityChecker = new ShortFormEntityChecker(bidiShortFormProvider);
+    public void AddAxioms(String manchesterString) throws Exception {
+        OWLOntologyDocumentSource ontoSrc = new StringDocumentSource(manchesterString);
+        OWLOntology in_onto = manager.loadOntologyFromOntologyDocument(ontoSrc);
 
-        parser.setOWLEntityChecker(entityChecker);
-        parser.setDefaultOntology(ontology);
-        parser.setStringToParse(manchesterString);
-        return parser;
+        in_onto.axioms().forEach((axiom) -> ontology.addAxiom(axiom));
+        return;
+    }
+
+    public void RemoveAxioms(String manchesterString) throws Exception {
+        OWLOntologyDocumentSource ontoSrc = new StringDocumentSource(manchesterString);
+        OWLOntology in_onto = manager.loadOntologyFromOntologyDocument(ontoSrc);
+
+        in_onto.axioms().forEach((axiom) -> ontology.removeAxiom(axiom));
+        return;
     }
 
     public void LoadOWL(String manchesterString){
@@ -73,6 +76,18 @@ class InfOntology {
         parser.parse(src, ontology, config);
 
         System.out.println(ontology.toString());
+    }
+
+    public String toManchester(){
+        OWLOntologyDocumentTarget out = new StringDocumentTarget();
+        OWLDocumentFormat mformat = new ManchesterSyntaxDocumentFormat();
+        try {
+            ontology.saveOntology(mformat, out);
+            return out.toString();
+        } catch (OWLOntologyStorageException e) {
+            e.printStackTrace();
+            return "";
+        }
     }
 
 }

@@ -34,17 +34,28 @@ public class InfinityMain {
     public static void testInfOnto() throws Exception {
         InfOntology inf_onto = new InfOntology();
         inf_onto.LoadOWL("Prefix: : <http://example.com/>\n" + "Class: Person\n");
-        // inf_onto.ParseAxiom("Class: Person");
-
+        inf_onto.AddAxioms("Class: Ghost");
+        inf_onto.RemoveAxioms("Class: Ghost");
+        System.out.println(inf_onto.toManchester());
         // inf_onto.ParseExpression("Human and not Parent");
     }
     
     private final DLQuerySample query_inst = new DLQuerySample();
     public InfinityMain(){}
-    public DLQuerySample CreateInstance() {
-        DLQuerySample inst = new DLQuerySample();
-        return inst;
-    }   
+    public InfOntology CreateOntology() {
+        InfOntology ontology = null;
+        try {
+            ontology = new InfOntology();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return ontology;
+    }
+
+    public InfDLQuery CreateQuery(InfOntology ontology) {
+        InfDLQuery query = new InfDLQuery(ontology);
+        return query;
+    }
     
     public static void main(String[] argv) throws Exception {
         // testDummy();
@@ -59,9 +70,11 @@ public class InfinityMain {
                 + "from py4j.java_gateway import JavaGateway,  GatewayParameters\n"
                 + "gateway = JavaGateway(gateway_parameters=GatewayParameters(port=21322))\n"
                 + "infinity = gateway.entry_point\n"
-                + "owlQuery = infinity.CreateInstance()\n"
-                + "owlQuery.LoadOntology(<ontofilepath>)\n"
-                + "owlQuery.Query(<Manchester syntax>)\n");
+                + "infOnto = infinity.CreateOntology()\n"
+                + "infQuery = infinity.CreateQuery(infOnto)"
+                + "infOnto.LoadOntology(<ontofilepath>)\n"
+                + "infQuery.Query(<Manchester syntax>)\n"
+                + "infQuery.Ask(<Manchester syntax>)");
 
     }
 }
