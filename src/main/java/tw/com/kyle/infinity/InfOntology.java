@@ -3,6 +3,7 @@ package tw.com.kyle.infinity;
 import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.Arrays;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -24,15 +25,11 @@ import org.semanticweb.owlapi.util.mansyntax.ManchesterOWLSyntaxParser;
 class InfOntology {
     private OWLOntology ontology = null;
     private OWLOntologyManager manager = null;
-    private BidirectionalShortFormProvider bidiShortFormProvider = null;
 
     public InfOntology() throws Exception {
         manager = OWLManager.createOWLOntologyManager();
         ontology = manager.createOntology();
-        Stream<OWLOntology> importsClosure = ontology.imports();
-        ShortFormProvider shortFormProvider = new SimpleShortFormProvider();
-        bidiShortFormProvider = new BidirectionalShortFormProviderAdapter(manager,
-                importsClosure.collect(Collectors.toList()), shortFormProvider);
+
     }
 
     public OWLOntology GetOwlOntology() {
@@ -40,7 +37,10 @@ class InfOntology {
     }
 
     public BidirectionalShortFormProvider GetShortFormProvider() {
-        return bidiShortFormProvider;
+        Stream<OWLOntology> importsClosure = ontology.imports();
+        ShortFormProvider shortFormProvider = new SimpleShortFormProvider();
+        return new BidirectionalShortFormProviderAdapter(
+                Arrays.asList(ontology), shortFormProvider);
     }
 
     public void ImportFile(String ontoPath) throws Exception {
@@ -48,28 +48,30 @@ class InfOntology {
             throw new FileNotFoundException("Cannot find " + ontoPath);
         }
         OWLOntologyDocumentSource ontoSrc = new FileDocumentSource(new File(ontoPath));
-        OWLOntology in_onto = manager.loadOntologyFromOntologyDocument(ontoSrc);
+        OWLParser parser = new ManchesterOWLSyntaxOntologyParserFactory().createParser();
+        OWLOntologyLoaderConfiguration config = new OWLOntologyLoaderConfiguration();
+        parser.parse(ontoSrc, ontology, config);
 
-        in_onto.axioms().forEach((axiom)-> ontology.addAxiom(axiom));
+        // in_onto.axioms().forEach((axiom)-> ontology.addAxiom(axiom));
     }
 
     public void AddAxioms(String manchesterString) throws Exception {
-        OWLOntologyDocumentSource ontoSrc = new StringDocumentSource(manchesterString);
-        OWLOntology in_onto = manager.loadOntologyFromOntologyDocument(ontoSrc);
+        ManchesterParser parser = new ManchesterParser(this);
+        parser.ParseAxioms(manchesterString);
 
-        in_onto.axioms().forEach((axiom) -> ontology.addAxiom(axiom));
         return;
     }
 
     public void RemoveAxioms(String manchesterString) throws Exception {
-        OWLOntologyDocumentSource ontoSrc = new StringDocumentSource(manchesterString);
-        OWLOntology in_onto = manager.loadOntologyFromOntologyDocument(ontoSrc);
+        ManchesterParser parser = new ManchesterParser(this);
+        OWLOntology new_onto = OWLManager.createOWLOntologyManager().createOntology();
+        parser.ParseAxiomsToNewOnto(manchesterString, new_onto);
 
-        in_onto.axioms().forEach((axiom) -> ontology.removeAxiom(axiom));
+        new_onto.axioms().forEach((axiom) -> ontology.removeAxiom(axiom));
         return;
     }
 
-    public void LoadOWL(String manchesterString){
+    public void LoadManchester(String manchesterString){
         OWLParser parser = new ManchesterOWLSyntaxOntologyParserFactory().createParser();
         OWLOntologyDocumentSource src = new StringDocumentSource(manchesterString);
         OWLOntologyLoaderConfiguration config = new OWLOntologyLoaderConfiguration();

@@ -3,11 +3,13 @@ package tw.com.kyle.infinity;
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.expression.OWLEntityChecker;
 import org.semanticweb.owlapi.expression.ShortFormEntityChecker;
+import org.semanticweb.owlapi.io.OWLOntologyDocumentSource;
+import org.semanticweb.owlapi.io.StringDocumentSource;
+import org.semanticweb.owlapi.manchestersyntax.parser.ManchesterOWLSyntaxOntologyParser;
 import org.semanticweb.owlapi.manchestersyntax.parser.ManchesterOWLSyntaxOntologyParserFactory;
 import org.semanticweb.owlapi.manchestersyntax.parser.ManchesterOWLSyntaxParserException;
-import org.semanticweb.owlapi.model.OWLAxiom;
-import org.semanticweb.owlapi.model.OWLClassAxiom;
-import org.semanticweb.owlapi.model.OWLClassExpression;
+import org.semanticweb.owlapi.manchestersyntax.parser.ManchesterOWLSyntaxParserImpl;
+import org.semanticweb.owlapi.model.*;
 import org.semanticweb.owlapi.util.BidirectionalShortFormProvider;
 import org.semanticweb.owlapi.util.mansyntax.ManchesterOWLSyntaxParser;
 
@@ -43,4 +45,21 @@ public class ManchesterParser {
         return expr;
     }
 
+    public void ParseAxioms(String manchesterString){
+        OWLOntology ori_onto = ontology.GetOwlOntology();
+
+        InfinityOWLSyntaxOntologyParser parser = new InfinityOWLSyntaxOntologyParser();
+        OWLOntologyDocumentSource ontoSrc = new StringDocumentSource(manchesterString);
+
+        parser.parse(ontoSrc, ori_onto, null, bidiShortFormProvider, new OWLOntologyLoaderConfiguration());
+    }
+
+    public void ParseAxiomsToNewOnto(String manchesterString, OWLOntology new_onto){
+        OWLOntology ori_onto = ontology.GetOwlOntology();
+
+        InfinityOWLSyntaxOntologyParser parser = new InfinityOWLSyntaxOntologyParser();
+        OWLOntologyDocumentSource ontoSrc = new StringDocumentSource(manchesterString);
+
+        parser.parse(ontoSrc, new_onto, ori_onto, bidiShortFormProvider, new OWLOntologyLoaderConfiguration());
+    }
 }
