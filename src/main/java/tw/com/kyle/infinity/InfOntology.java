@@ -42,7 +42,6 @@ class InfOntology {
     private void init(IRI iri) throws Exception {
         default_iri = iri;
         manager = OWLManager.createOWLOntologyManager();
-        ontology = manager.createOntology(default_iri);
     }
 
     public void SetDefaultIRI(IRI iri){
@@ -54,7 +53,12 @@ class InfOntology {
     }
 
     public OWLOntology GetOwlOntology(IRI iri) {
-        return manager.getOntology(iri);
+        if (manager.contains(iri)) {
+            return manager.getOntology(iri);
+        } else {
+            System.out.println("WARNING: Cannot find " + iri.toString());
+            return null;
+        }
     }
 
     public int AxiomCount(){
@@ -62,10 +66,17 @@ class InfOntology {
     }
 
     public BidirectionalShortFormProvider GetShortFormProvider(IRI iri) {
-        Stream<OWLOntology> importsClosure = GetOwlOntology(iri).imports();
+        OWLOntology onto = GetOwlOntology(iri);
+        Set<OWLOntology> importsClosureSet = new HashSet<>();
+        if (onto != null) {
+            Stream<OWLOntology> importsClosure = onto.imports();
+            importsClosureSet = importsClosure.collect(Collectors.toSet());
+            importsClosureSet.add(GetOwlOntology());
+        }
+
         ShortFormProvider shortFormProvider = new SimpleShortFormProvider();
         return new BidirectionalShortFormProviderAdapter(manager,
-                importsClosure.collect(Collectors.toList()),
+                importsClosureSet,
                 shortFormProvider);
     }
 
@@ -120,6 +131,7 @@ class InfOntology {
         OWLOntologyDocumentTarget out = new StringDocumentTarget();
         OWLDocumentFormat mformat = new ManchesterSyntaxDocumentFormat();
         try {
+            OWLOntology ontology = GetOwlOntology();
             ontology.saveOntology(mformat, out);
             return out.toString();
         } catch (OWLOntologyStorageException e) {

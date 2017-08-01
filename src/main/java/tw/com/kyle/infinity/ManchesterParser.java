@@ -4,6 +4,8 @@ import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.expression.OWLEntityChecker;
 import org.semanticweb.owlapi.expression.ShortFormEntityChecker;
 import org.semanticweb.owlapi.io.OWLOntologyDocumentSource;
+import org.semanticweb.owlapi.io.OWLParser;
+import org.semanticweb.owlapi.io.OWLParserException;
 import org.semanticweb.owlapi.io.StringDocumentSource;
 import org.semanticweb.owlapi.manchestersyntax.parser.ManchesterOWLSyntaxOntologyParser;
 import org.semanticweb.owlapi.manchestersyntax.parser.ManchesterOWLSyntaxOntologyParserFactory;
@@ -32,7 +34,10 @@ public class ManchesterParser {
 
         OWLEntityChecker entityChecker = new ShortFormEntityChecker(bidiShortFormProvider);
         parser.setOWLEntityChecker(entityChecker);
-        parser.setDefaultOntology(ontology.GetOwlOntology());
+        OWLOntology def_onto = ontology.GetOwlOntology();
+        if (def_onto != null) {
+            parser.setDefaultOntology(def_onto);
+        }
         parser.setStringToParse(manchesterString);
         return parser;
     }
@@ -41,8 +46,26 @@ public class ManchesterParser {
         ManchesterOWLSyntaxParser parser = getManchesterParser(manchesterString);
         OWLClassExpression expr = parser.parseClassExpression();
 
-        System.out.println(expr);
+        System.out.println("ClassExpr: " + expr);
         return expr;
+    }
+
+    public String CheckSyntax(String manchesterString) throws Exception {
+        ManchesterOWLSyntaxParser parser = getManchesterParser(manchesterString);
+        OWLOntology base_onto = ontology.GetOwlOntology();
+        OWLOntology onto = null;
+        if (base_onto != null) {
+            onto = base_onto.getOWLOntologyManager().createOntology();
+        } else {
+            onto = OWLManager.createOWLOntologyManager().createOntology();
+        }
+
+        try {
+            parser.parseOntology(onto);
+        } catch (OWLParserException ex){
+            return ex.getMessage();
+        }
+        return "";
     }
 
     public void ParseAxioms(String manchesterString){

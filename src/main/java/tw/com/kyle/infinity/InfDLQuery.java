@@ -33,8 +33,8 @@ public class InfDLQuery {
 
     public InfQueryResult Query(String queryStr) throws Exception {
         InfQueryResult result = new InfQueryResult();
-        result.subClasses = mapToShortForm(engine.getSubClasses(queryStr, true));
-        result.superClasses = mapToShortForm(engine.getSuperClasses(queryStr, true));
+        result.subClasses = mapToShortForm(engine.getSubClasses(queryStr, false));
+        result.superClasses = mapToShortForm(engine.getSuperClasses(queryStr, false));
         result.equivalents = mapToShortForm(engine.getEquivalentClasses(queryStr));
         result.instances = mapToShortForm(engine.getInstances(queryStr, true));
 
