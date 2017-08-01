@@ -32,15 +32,7 @@ public class InfinityMain {
     }       
 
     public static void testInfOnto() throws Exception {
-        InfOntology inf_onto = new InfOntology();
-        inf_onto.LoadManchester("Prefix: : <http://example.com/>\n" + "Class: Person\n");
-        inf_onto.AddAxioms("Prefix: : <http://example.com/> \n" +
-                           "Class: Student\n" +
-                           "  SubClassOf: Person\n\n" +
-                           "Class: Ghost\n");
-        inf_onto.RemoveAxioms("Prefix: : <http://example.com/> \n Class: Ghost");
-        System.out.println(inf_onto.toManchester());
-        // inf_onto.ParseExpression("Human and not Parent");
+
     }
 
     public InfinityMain(){}

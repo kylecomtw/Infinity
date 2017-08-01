@@ -21,7 +21,6 @@ public class InfDLQuery {
 
     public InfDLQuery(InfOntology onto) {
         ontology = onto;
-        OWLReasoner reasoner = new ReasonerFactory().createReasoner(ontology.GetOwlOntology());
         engine = new InfDLQueryEngine(ontology);
         shortFormProvider = new SimpleShortFormProvider();
     }
