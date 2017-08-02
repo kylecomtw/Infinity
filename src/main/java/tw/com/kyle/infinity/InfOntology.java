@@ -48,6 +48,13 @@ class InfOntology {
         default_iri = iri;
     }
 
+    private void setDefaultOntology(OWLOntology onto){
+        OWLOntologyID oid = onto.getOntologyID();
+        if(oid.getOntologyIRI().isPresent()){
+            SetDefaultIRI(oid.getOntologyIRI().get());
+        }
+    }
+
     public OWLOntology GetOwlOntology() {
         return manager.getOntology(default_iri);
     }
@@ -84,9 +91,21 @@ class InfOntology {
         return GetShortFormProvider(default_iri);
     }
 
+    public List<String> ListOntologyIRIs(){
+        return manager.ontologies().map((x)->{
+            OWLOntologyID oid = x.getOntologyID();
+            if (oid.getDefaultDocumentIRI().isPresent()){
+                return oid.getDefaultDocumentIRI().get().toString();
+            } else {
+                return oid.toString();
+            }
+        }).collect(Collectors.toList());
+    }
+
     public OWLOntology ImportOntology(String ontoLocation) throws Exception {
         IRI iri = IRI.create(ontoLocation);
         OWLOntology in_onto = manager.loadOntology(iri);
+        setDefaultOntology(in_onto);
         return in_onto;
     }
 
@@ -94,6 +113,7 @@ class InfOntology {
         OWLOntologyDocumentSource ontoSrc = new StringDocumentSource(ontoString);
         OWLOntology in_onto = manager.loadOntologyFromOntologyDocument(ontoSrc);
 
+        setDefaultOntology(in_onto);
         return in_onto;
     }
 
@@ -126,12 +146,15 @@ class InfOntology {
         return;
     }
 
+    public String toManchester() {
+        return toManchester(default_iri);
+    }
 
-    public String toManchester(){
+    public String toManchester(IRI iri){
         OWLOntologyDocumentTarget out = new StringDocumentTarget();
         OWLDocumentFormat mformat = new ManchesterSyntaxDocumentFormat();
         try {
-            OWLOntology ontology = GetOwlOntology();
+            OWLOntology ontology = GetOwlOntology(iri);
             ontology.saveOntology(mformat, out);
             return out.toString();
         } catch (OWLOntologyStorageException e) {

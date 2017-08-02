@@ -11,29 +11,15 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import py4j.GatewayServer;
 
+import java.util.List;
+
 /**
  *
  * @author Sean_S325
  */
 public class InfinityMain {
 
-    public static void testDummy() throws Exception {
-        String ontoFilePath = "E:\\Kyle\\TextInf\\etc\\dbpedia_2016-04.owl";
-        DLQuerySample dl_query = new DLQuerySample();
-        dl_query.LoadOntology(ontoFilePath);
-        JsonElement jelem = dl_query.QueryAsJson("Bird and Animal");
-        JsonElement jsatis = dl_query.AskAsJson("Bird and Plant");
-        Gson gson = new GsonBuilder().setPrettyPrinting().create();
-        JsonObject jobj = new JsonObject();
-        jobj.add("Query", jelem);
-        jobj.add("Ask", jsatis);
-        String resp = gson.toJson(jobj);        
-        System.out.println(resp);
-    }       
 
-    public static void testInfOnto() throws Exception {
-
-    }
 
     public InfinityMain(){}
     public InfOntology CreateOntology() {
@@ -50,13 +36,18 @@ public class InfinityMain {
         InfDLQuery query = new InfDLQuery(ontology);
         return query;
     }
-    
-    public static void main(String[] argv) throws Exception {
-        // testDummy();
-        testInfOnto();
+
+    public String SyntaxCheck(InfOntology onto, String manString){
+        ManchesterParser parser = new ManchesterParser(onto);
+        try {
+            return parser.CheckSyntax(manString);
+        } catch (Exception e) {
+            // e.printStackTrace();
+            return "Error: " + e.toString();
+        }
     }
-    
-    public static void main2(String[] argv) throws Exception {
+
+    public static void main(String[] argv) throws Exception {
         GatewayServer gateway = new GatewayServer(new InfinityMain(), 21322);
         gateway.start();
         System.out.println("Gateway server running on 0.0.0.0:21322");
@@ -65,10 +56,13 @@ public class InfinityMain {
                 + "gateway = JavaGateway(gateway_parameters=GatewayParameters(port=21322))\n"
                 + "infinity = gateway.entry_point\n"
                 + "infOnto = infinity.CreateOntology()\n"
-                + "infQuery = infinity.CreateQuery(infOnto)"
-                + "infOnto.LoadOntology(<ontofilepath>)\n"
-                + "infQuery.Query(<Manchester syntax>)\n"
-                + "infQuery.Ask(<Manchester syntax>)");
-
+                + "infOnto.ImportOntologyFromString(<ontoString>)\n"
+                + "infOnto.ImportOntology(<ontoFiles>)\n"
+                + "infOnto.AddAxioms(<ontoString>)\n"
+                + "infOnto.RemoveAxioms(<ontoString>)\n"
+                + "---"
+                + "infQuery = infinity.CreateQuery(infOnto)\n"
+                + "infQuery.QueryForJson(<Manchester class expr>)\n"
+                + "infQuery.AskForJson(<Manchester class expr>)");
     }
 }

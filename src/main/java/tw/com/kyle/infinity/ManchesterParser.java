@@ -46,7 +46,7 @@ public class ManchesterParser {
         ManchesterOWLSyntaxParser parser = getManchesterParser(manchesterString);
         OWLClassExpression expr = parser.parseClassExpression();
 
-        System.out.println("ClassExpr: " + expr);
+        // System.out.println("ClassExpr: " + expr);
         return expr;
     }
 

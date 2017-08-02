@@ -152,4 +152,24 @@ class InfOntologyTest {
         assertEquals(3, nsuper);
 
     }
+
+    @Test
+    public void testListIRI() {
+        try {
+            InfOntology inf_onto = new InfOntology();
+            inf_onto.ImportOntologyFromString("" +
+                    "Prefix: : <http://example.com/>\n" +
+                    "Ontology: <http://example.com/1>\n" +
+                    "Class: A\n");
+            inf_onto.ImportOntologyFromString("" +
+                    "Prefix: : <http://example.com/>\n" +
+                    "Ontology: <http://example.com/2>\n" +
+                    "Class: B\n");
+            List<String> onto_list = inf_onto.ListOntologyIRIs();
+            assertEquals(2, onto_list.size());
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+    }
 }

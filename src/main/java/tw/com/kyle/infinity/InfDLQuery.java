@@ -41,12 +41,28 @@ public class InfDLQuery {
         return result;
     }
 
-    public InfAskResult AskAsJson(String queryStr) {
+    public InfAskResult Ask(String queryStr) {
         InfAskResult result = new InfAskResult();
         result.isSatisfiable = engine.isSatisfiable(queryStr);
 
         return result;
     }
 
+    public String QueryForJson(String queryStr) {
+        try{
+            return Query(queryStr).ToJson();
+        } catch (Exception ex){
+            System.out.println(ex);
+            return "{result: 'error'}";
+        }
+    }
 
+    public String AskForJson(String queryStr) {
+        try{
+            return Ask(queryStr).ToJson();
+        } catch (Exception ex){
+            System.out.println(ex);
+            return "{result: 'error'}";
+        }
+    }
 }
