@@ -53,7 +53,7 @@ public class InfDLQuery {
             return Query(queryStr).ToJson();
         } catch (Exception ex){
             System.out.println(ex);
-            return "{result: 'error'}";
+            return "{\"result\": \"error\"}";
         }
     }
 
@@ -62,7 +62,7 @@ public class InfDLQuery {
             return Ask(queryStr).ToJson();
         } catch (Exception ex){
             System.out.println(ex);
-            return "{result: 'error'}";
+            return "{\"result\": \"error\"}";
         }
     }
 }

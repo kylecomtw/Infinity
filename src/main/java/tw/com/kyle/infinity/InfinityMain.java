@@ -9,8 +9,13 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+import org.semanticweb.owlapi.model.IRI;
+import org.semanticweb.owlapi.model.OWLOntology;
+import org.semanticweb.owlapi.model.OWLOntologyID;
 import py4j.GatewayServer;
 
+import java.net.URI;
+import java.nio.file.Paths;
 import java.util.List;
 
 /**
@@ -20,30 +25,95 @@ import java.util.List;
 public class InfinityMain {
 
 
+    private InfOntology inf_onto = null;
+    public static InfinityMain CreateInstance() {
+        return new InfinityMain();
+    }
 
-    public InfinityMain(){}
-    public InfOntology CreateOntology() {
-        InfOntology ontology = null;
+    public InfinityMain(){
+        try{
+            inf_onto = new InfOntology();
+        } catch (Exception ex){
+            ex.printStackTrace();
+        }
+    }
+
+    private String getOntologyIRI(OWLOntology onto){
+        OWLOntologyID oid = onto.getOntologyID();
+        if (oid.getOntologyIRI().isPresent()){
+            return oid.getOntologyIRI().get().toString();
+        } else {
+            return oid.toString();
+        }
+    }
+
+    public String RemoveIfExists(String iri){
+        boolean ret = inf_onto.RemoveIfExists(IRI.create(iri));
+        return String.format("{\"ret\": \"%s\"}", ret);
+    }
+
+    public String List(){
+        String iris = String.join("\",\"", inf_onto.ListOntologyIRIs());
+        return String.format("[\"%s\"]", iris);
+    }
+
+    public String Import(String ontoFile){
         try {
-            ontology = new InfOntology();
+            URI onto_uri = Paths.get(ontoFile).toUri();
+            OWLOntology in_onto = inf_onto.ImportOntology(onto_uri.toString());
+            return String.format("{\"ret\": \"success\", \"iri\": \"%s\"}", getOntologyIRI(in_onto));
         } catch (Exception e) {
             e.printStackTrace();
+            return "{\"ret\": \"error\"}";
         }
-        return ontology;
     }
 
-    public InfDLQuery CreateQuery(InfOntology ontology) {
-        InfDLQuery query = new InfDLQuery(ontology);
-        return query;
-    }
-
-    public String SyntaxCheck(InfOntology onto, String manString){
-        ManchesterParser parser = new ManchesterParser(onto);
+    public String Submit(String ontoString) {
         try {
-            return parser.CheckSyntax(manString);
+            OWLOntology in_onto = inf_onto.ImportOntologyFromString(ontoString);
+            return String.format("{\"ret\": \"success\", \"iri\": \"%s\"}", getOntologyIRI(in_onto));
         } catch (Exception e) {
-            // e.printStackTrace();
-            return "Error: " + e.toString();
+            e.printStackTrace();
+            return "{\"ret\": \"error\"}";
+        }
+    }
+
+    public String Query(String iri, String classExpr) {
+        boolean hasIRI = inf_onto.SetDefaultIRI(IRI.create(iri));
+        if (hasIRI){
+            InfDLQuery query = new InfDLQuery(inf_onto);
+            String queryRes = query.QueryForJson(classExpr);
+            return queryRes;
+        } else {
+            return "{\"ret\": \"error\", \"message\": \"IRI not available\"}";
+        }
+
+    }
+
+    public String Ask(String iri, String classExpr) {
+        boolean hasIRI = inf_onto.SetDefaultIRI(IRI.create(iri));
+        if (hasIRI){
+            InfDLQuery query = new InfDLQuery(inf_onto);
+            String askRes = query.AskForJson(classExpr);
+            return askRes;
+        } else {
+            return "{\"ret\": \"error\", \"message\": \"IRI not available\"}";
+        }
+    }
+
+    public String Check(String iri, String manString){
+        boolean hasIRI = inf_onto.SetDefaultIRI(IRI.create(iri));
+        if (hasIRI) {
+            inf_onto.SetDefaultIRI(IRI.create(iri));
+            ManchesterParser parser = new ManchesterParser(inf_onto);
+            try {
+                return parser.CheckSyntax(manString);
+            } catch (Exception e) {
+                // e.printStackTrace();
+                return String.format("{\"res\": \"error\", \"message\": \"%s\"}", e.getMessage());
+            }
+        } else {
+            return "{\"ret\": \"error\", \"message\": \"IRI not available\"}";
         }
     }
 
@@ -55,14 +125,11 @@ public class InfinityMain {
                 + "from py4j.java_gateway import JavaGateway,  GatewayParameters\n"
                 + "gateway = JavaGateway(gateway_parameters=GatewayParameters(port=21322))\n"
                 + "infinity = gateway.entry_point\n"
-                + "infOnto = infinity.CreateOntology()\n"
-                + "infOnto.ImportOntologyFromString(<ontoString>)\n"
-                + "infOnto.ImportOntology(<ontoFiles>)\n"
-                + "infOnto.AddAxioms(<ontoString>)\n"
-                + "infOnto.RemoveAxioms(<ontoString>)\n"
-                + "---"
-                + "infQuery = infinity.CreateQuery(infOnto)\n"
-                + "infQuery.QueryForJson(<Manchester class expr>)\n"
-                + "infQuery.AskForJson(<Manchester class expr>)");
+                + "inf = infinity.CreateInstance()\n"
+                + "inf.Submit(<ontoStr>)\n"
+                + "inf.Import(<ontoFilePath>)\n"
+                + "inf.Query(<ClassExpr>)\n"
+                + "inf.Ask(<ClassExpr>)\n"
+                + "inf.Check(<ontoStr>)\n");
     }
 }

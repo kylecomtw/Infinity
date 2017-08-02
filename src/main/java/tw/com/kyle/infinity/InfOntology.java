@@ -44,14 +44,29 @@ class InfOntology {
         manager = OWLManager.createOWLOntologyManager();
     }
 
-    public void SetDefaultIRI(IRI iri){
-        default_iri = iri;
+    public boolean SetDefaultIRI(IRI iri){
+        if (manager.contains(iri)) {
+            default_iri = iri;
+            return true;
+        } else {
+            return false;
+        }
     }
 
     private void setDefaultOntology(OWLOntology onto){
         OWLOntologyID oid = onto.getOntologyID();
         if(oid.getOntologyIRI().isPresent()){
             SetDefaultIRI(oid.getOntologyIRI().get());
+        }
+    }
+
+    public boolean RemoveIfExists(IRI iri){
+        if (manager.contains(iri)){
+            OWLOntology onto = manager.getOntology(iri);
+            manager.removeOntology(onto);
+            return true;
+        } else {
+            return false;
         }
     }
 
