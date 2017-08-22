@@ -172,4 +172,25 @@ class InfOntologyTest {
         }
 
     }
+
+
+    @Test
+    void infOntologyUpdate() throws Exception {
+        InfOntology inf_onto = new InfOntology();
+        String base_iri = "http://example.com/ontology/person";
+
+        inf_onto.ImportOntologyFromString("" +
+                "Prefix: : <http://example.com/>\n" +
+                "Ontology: <" + base_iri + ">\n" +
+                "Class: Person\n");
+
+        inf_onto.ImportOntologyFromString("" +
+                "Prefix: : <http://example.com/>\n" +
+                "Ontology: <" + base_iri + ">\n" +
+                "Class: Person\n" +
+                "Class: Animal\n");
+
+        assertEquals(5, inf_onto.GetOwlOntology(IRI.create(base_iri)).getAxiomCount());
+        // inf_onto.ParseExpression("Human and not Parent");
+    }
 }
