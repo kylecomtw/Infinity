@@ -173,24 +173,51 @@ class InfOntologyTest {
 
     }
 
+    @Test
+    public void testClassList(){
+        try {
+            InfOntology inf_onto = new InfOntology();
+            inf_onto.ImportOntologyFromString("" +
+                    "Prefix: : <http://example.com/>\n" +
+                    "Ontology: <http://example.com/1>\n" +
+                    "Class: A\nClass: B\n Class: C\n");
+            List<String> onto_list = inf_onto.ListClasses(IRI.create("http://example.com/1"));
+            assertEquals(3, onto_list.size());
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
 
     @Test
-    void infOntologyUpdate() throws Exception {
-        InfOntology inf_onto = new InfOntology();
-        String base_iri = "http://example.com/ontology/person";
-
-        inf_onto.ImportOntologyFromString("" +
-                "Prefix: : <http://example.com/>\n" +
-                "Ontology: <" + base_iri + ">\n" +
-                "Class: Person\n");
-
-        inf_onto.ImportOntologyFromString("" +
-                "Prefix: : <http://example.com/>\n" +
-                "Ontology: <" + base_iri + ">\n" +
-                "Class: Person\n" +
-                "Class: Animal\n");
-
-        assertEquals(5, inf_onto.GetOwlOntology(IRI.create(base_iri)).getAxiomCount());
-        // inf_onto.ParseExpression("Human and not Parent");
+    public void testIndividualList(){
+        try {
+            InfOntology inf_onto = new InfOntology();
+            inf_onto.ImportOntologyFromString("" +
+                    "Prefix: : <http://example.com/>\n" +
+                    "Ontology: <http://example.com/1>\n" +
+                    "Individual: A\nIndividual: B\n Individual: C\n");
+            List<String> onto_list = inf_onto.ListIndividuals(IRI.create("http://example.com/1"));
+            assertEquals(3, onto_list.size());
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
+
+    @Test
+    public void testPropertyList(){
+        try {
+            InfOntology inf_onto = new InfOntology();
+            inf_onto.ImportOntologyFromString("" +
+                    "Prefix: : <http://example.com/>\n" +
+                    "Ontology: <http://example.com/1>\n" +
+                    "ObjectProperty: A\nObjectProperty: B\n DataProperty: C\n");
+            List<String> onto_list = inf_onto.ListProperties(IRI.create("http://example.com/1"));
+            assertEquals(3, onto_list.size());
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+
+
 }

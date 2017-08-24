@@ -52,10 +52,10 @@ public class ManchesterParser {
 
     public String CheckSyntax(String manchesterString) throws Exception {
         ManchesterOWLSyntaxParser parser = getManchesterParser(manchesterString);
-        OWLOntology base_onto = ontology.GetOwlOntology();
+        OWLOntologyManager ontoMan = ontology.GetOwlOntologyManager();
         OWLOntology onto = null;
-        if (base_onto != null) {
-            onto = base_onto.getOWLOntologyManager().createOntology();
+        if (ontoMan != null) {
+            onto = ontoMan.createOntology();
         } else {
             onto = OWLManager.createOWLOntologyManager().createOntology();
         }

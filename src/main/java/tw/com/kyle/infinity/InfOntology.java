@@ -15,6 +15,7 @@ import org.semanticweb.owlapi.formats.ManchesterSyntaxDocumentFormat;
 import org.semanticweb.owlapi.io.*;
 import org.semanticweb.owlapi.manchestersyntax.parser.ManchesterOWLSyntaxOntologyParserFactory;
 import org.semanticweb.owlapi.model.*;
+import org.semanticweb.owlapi.model.parameters.Imports;
 import org.semanticweb.owlapi.util.BidirectionalShortFormProvider;
 import org.semanticweb.owlapi.util.BidirectionalShortFormProviderAdapter;
 import org.semanticweb.owlapi.util.OntologyAxiomPair;
@@ -22,7 +23,7 @@ import org.semanticweb.owlapi.util.ShortFormProvider;
 import org.semanticweb.owlapi.util.SimpleShortFormProvider;
 import org.semanticweb.owlapi.util.mansyntax.ManchesterOWLSyntaxParser;
 
-class InfOntology {
+public class InfOntology {
     private IRI default_iri = null;
     private OWLOntology ontology = null;
     private OWLOntologyManager manager = null;
@@ -72,6 +73,10 @@ class InfOntology {
 
     public OWLOntology GetOwlOntology() {
         return manager.getOntology(default_iri);
+    }
+
+    public OWLOntologyManager GetOwlOntologyManager(){
+        return manager;
     }
 
     public OWLOntology GetOwlOntology(IRI iri) {
@@ -159,6 +164,57 @@ class InfOntology {
 
         manager.removeOntology(new_onto);
         return;
+    }
+
+    public List<String> ListClasses(IRI iri) {
+
+        if (manager.contains(iri)) {
+            ShortFormProvider shortFormProvider = new SimpleShortFormProvider();
+            OWLOntology onto = manager.getOntology(iri);
+            List<String> classes = onto.classesInSignature().map((x)->{
+                return shortFormProvider.getShortForm(x);
+            }).collect(Collectors.toList());
+            return classes;
+        } else {
+            System.out.println("WARNING: Cannot find " + iri.toString());
+            return new ArrayList<>();
+        }
+    }
+
+    public List<String> ListIndividuals(IRI iri) {
+
+        if (manager.contains(iri)) {
+            ShortFormProvider shortFormProvider = new SimpleShortFormProvider();
+            OWLOntology onto = manager.getOntology(iri);
+            List<String> idvList = onto.individualsInSignature().map((x)->{
+                return shortFormProvider.getShortForm(x);
+            }).collect(Collectors.toList());
+            return idvList;
+        } else {
+            System.out.println("WARNING: Cannot find " + iri.toString());
+            return new ArrayList<>();
+        }
+    }
+
+    public List<String> ListProperties(IRI iri) {
+
+        if (manager.contains(iri)) {
+            ShortFormProvider shortFormProvider = new SimpleShortFormProvider();
+            OWLOntology onto = manager.getOntology(iri);
+            Stream<String> objProps = onto.objectPropertiesInSignature().map((x)->{
+                return shortFormProvider.getShortForm(x);
+            });
+            Stream<String> dataProps = onto.dataPropertiesInSignature().map((x)->{
+                return shortFormProvider.getShortForm(x);
+            });
+
+            List<String> props = Stream.concat(objProps, dataProps).collect(Collectors.toList());
+
+            return props;
+        } else {
+            System.out.println("WARNING: Cannot find " + iri.toString());
+            return new ArrayList<>();
+        }
     }
 
     public String toManchester() {
